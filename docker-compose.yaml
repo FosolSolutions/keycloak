@@ -1,0 +1,45 @@
+version: "3.5"
+
+services:
+  ####################### Keycloak #######################
+  keycloak:
+    restart: on-failure:1
+    container_name: keycloak
+    build:
+      context: ./app
+    env_file:
+      - ./app/.env
+    volumes:
+      - ./app/config/realm-export.json:/tmp/realm-export.json
+    ports:
+      - 8080:8080
+    networks:
+      - keycloak-net
+    depends_on:
+      - database
+
+  ####################### Database #######################
+  database:
+    restart: on-failure:1
+    container_name: keycloak-db
+    build:
+      context: database
+    env_file:
+      - ./database/.env
+    ports:
+      - "5433:5432"
+    volumes:
+      - keycloak-data:/var/opt/mssql
+    networks:
+      - keycloak-net
+
+####################### Networks Definition #######################
+networks:
+  keycloak-net:
+    name: keycloak-net
+    driver: bridge
+
+####################### Volumes Definition #######################
+volumes:
+  keycloak-data:
+    name: keycloak-data
