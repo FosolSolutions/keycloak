@@ -26,22 +26,14 @@ More information [here](https://www.keycloak.org/docs/latest/server_admin/index.
 
 Once the keycloak container is running, ssh into it and execute the following commands;
 
-### Find Docker Container ID
-
-```bash
-docker ps
-```
-
-### SSH into the Container
-
-```bash
-docker exec -it {ContainerID} bash
-```
-
 ### Export the Configuration
 
 ```bash
-docker exec -it keycloak bash
+# Determine your container name
+docker ps
+# SSH into the container
+docker exec -it {container name} bash
+# Export the realm information to the configured volume
 /opt/jboss/keycloak/bin/standalone.sh \
   -Dkeycloak.migration.action=export \
   -Dkeycloak.migration.provider=singleFile \
@@ -56,14 +48,22 @@ docker exec -it keycloak bash
 
 ## Import Realm
 
-> Note that recent attempts to import the exported JSON during initialization results in failure.
+If you update your `/app/.env` configuration file with the following it will import the realm on startup.
+
+```conf
+KEYCLOAK_IMPORT=/tmp/realm-export.json -Dkeycloak.profile.feature.scripts=enabled -Dkeycloak.profile.
+```
+
 > However if you start the keycloak server without importing, check if it is up and running with only the **master** realm and then manually do the import below, it works.
-> Refer to the [Manual Steps](#manual-steps)
 
 To import a previously exported realm configuration execute the following command;
 
 ```bash
-docker exec -it keycloak bash
+# Determine your container name
+docker ps
+# SSH into the container
+docker exec -it {container name} bash
+# Import the realm from the configured volume
 /opt/jboss/keycloak/bin/standalone.sh \
   -Djboss.socket.binding.port-offset=100 \
   -Dkeycloak.migration.action=import \
